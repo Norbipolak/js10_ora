@@ -521,5 +521,122 @@ arra figyelünk, hogy ez arrow function legyen!!! mert megváltozik a scope és 
 visszaadta az összes termékadatot ->
 brand: "Apple"
 category: "smartphones"
-deletedOn: ""
+deletedOn: "2023-12-07T10:14:08.696Z"
+description: "An apple mobile which is nothing like apple"
+discountPercentage: 12.96
+id: 1
+images: (5) ....
+isDeleted: true
+price: 549
+rating: 4.69
+stock: 94
+thumbnail: ...
+title: "iPhone9"
+[[Prototype]]: Object 
+
+Ha arrow function írunk mondjuk a addProductBtn-nél akkor a this. nem az addProductBtn lesz, hanem undefined, 
+ha csak sima function irok akkor a this maga a button lesz (<button id=add-product>Add product</button>)
+
+Az a lényege az arrow function-nek, hogy nem hoz létre saját hatókör (scope-t).
+Valamikor jobb használni a sima functiont, mert az kell, hogy a this az legyen az amire rákattintottuk vagy aminek 
+az értékét megváltoztattuk.
+**************************************************************************************************************************
 */
+
+/*
+Hogyan tudunk keresni a JavaScript segítségével és ehhez szükségünk lesz arra, hogy megváltoztassuk, úgy hogy nem
+töltjükújra az oldalt -> a history.pushState segítségével.
+
+példa: Csinálunk egy buttont a index.html-en, adunk neki egy id="search"
+a products.executer.js-ben lementjük a gombot. Majd betesszük a location.pathname === "/index.html-hez"
+
+adunk neki egy eventListenert
+const searchBtn = document.querySelector("#search")
+
+searchBtn.addEventListener("click", function() {
+    historypushState({page: 1}, "title 1", "?page=1")
+}),
+
+A history.pushState vár 3 paramétert.
+az url-ünk 127.0.0.1:8080-ról ha megnyomjuk a gombot akkor megváltozik ->
+127.0.0.1:8080?page=1
+Megjelent ?page=1
+Ez azért jó, mert úgy jelenik meg, hogy nem töltjük újra az oldalt.
+
+historypushState({page: 1}, "title 1", "?page=1") ->
+historypushState(null, "", "?page=1")
+Az első az lehet null a második egy üres string, amire nekünk szükségünk van az 3. paraméter -> "?page=1"
+
+Azért fontos mert url változókkal rá fogunk keresni eggyes termékekre, mondjuk lehessen rákeresni kategóriákra
+
+az index.html-en csinálunk egy formot a <div class="container"> -be ->
+
+<div class="container">
+    <form id="search-form">
+        <div class="grid-4 box" style="margin-bottom: 15px;">
+            <div>
+                <h4>Kategóriák</h4>
+                <select id="category" name="category"> -> van egy id, hogy tudjuk azonosítani, belerakni az option-öket, a többinél csak name-k lesznek
+                    <option value="0">Válassz Kategóriát</option>     
+                <select>
+            </div>
+            <div>
+                <h4>Márka</h4>
+                <input type="text name="brand">
+            </div>
+            <div>
+                <h4>Terméknév</h4>
+                <input type="text name="title">
+            </div>
+            <div>
+                <h4>Keresés</h4>
+                <button id="search">Keresés!</search>
+            </div>
+        <div>
+    </form>
+    <div id="products-holder" class="grid-4"></div>
+</div>
+
+most még újratölti az oldalt de azt majd megakadályozzuk az e.preventDeafault()-val
+
+const searchBtn = document.querySelector("#search")
+const searchForm = document.querySelector("#search-form") - lementjük, hogy megszerezzük az adatokat belöle a const fd-vel
+
+searchBtn.addEventListener("click", function(e) {
+    e.preventDefault();
+
+    const fd = new FormData(searchForm); - megszereztük az adatokat 
+    let productUrl = "?"  -> összerakunk ezzel egy url-t, ? mert kérdőjellel kezdődik 
+
+    for(const entry of fd) {
+        const url = `${entry[0]}=${entry[1]}&`     ${entry[0]} -> az majd a name(category vagy brand) lesz, ${entry[1]} -> ez meg az értéke 
+        productUrl += url;                        hozzárakjuk a ?-hez az url-t amit csináltunk
+    }
+
+    productUrl = productUrl.substring(0, productUrl.length-1)
+    historypushState(null, "", "productUrl"); -> a harmadik paraméternek megadjuk a productUrl, amit mi generáltunk 
+}),
+
+ha console.log(productUrl) -> ezt fogjuk kapni ?category=0&brand=&title=&
+ha valamit beleírunk az input mezőnkbe az oldalon akkor az url -> ?category=0&brand=asfaf&title=dsgsrbw&
+
+még egy probléma van vele, hogy a végéről le kell majd szedni az extra ?-jelet (substring)
+productUrl.substring(0, productUrl.length-1)
+
+Elözőleg azért volt fontos az &-jel mert, így választjuk el egymástól az Url paramétereket, a végén viszont nem kell
+*/
+
+searchBtn.addEventListener("click", function(e) {
+    e.preventDefault();
+
+    const fd = new FormData(searchForm);
+    let productUrl = "?"  
+
+    for(const entry of fd) {
+        const url = `${entry[0]}=${entry[1]}&`      
+        productUrl += url;                       
+    }
+
+    productUrl = productUrl.substring(0, productUrl.length-1)
+    historypushState(null, "", "productUrl");
+});
